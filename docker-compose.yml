@@ -1,0 +1,82 @@
+# ==============================================================================
+# Docker Compose - TFG Music Recommender
+# ==============================================================================
+#
+# Multi-service architecture:
+#   - app:         Laravel PHP-FPM backend + Node.js for Vite dev server
+#   - webserver:   Nginx reverse proxy (serves the app on port 8000)
+#   - db:          MySQL 8.0 database (persistent volume)
+#   - ai-service:  Python FastAPI microservice for AI recommendations
+#
+# External dependency (not containerized):
+#   - Ollama: Runs on the host machine, accessed via host.docker.internal:11434
+#
+# Usage:
+#   docker-compose up -d --build
+#   docker exec -it tfg-app bash
+# ==============================================================================
+
+services:
+  # --- Laravel Application (PHP-FPM + Node.js) ---
+  app:
+    build: .
+    container_name: tfg-app
+    user: "1000:1000"                  # Run as non-root user
+    ports:
+      - "5173:5173"                    # Vite HMR dev server
+    volumes:
+      - .:/var/www                     # Mount project for live development
+      - ./docker-config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - tfg-network
+    depends_on:
+      - db
+
+  # --- Nginx Web Server ---
+  webserver:
+    image: nginx:alpine
+    container_name: tfg-webserver
+    ports:
+      - "8000:80"                      # Application accessible at localhost:8000
+    volumes:
+      - .:/var/www
+      - ./docker-config/nginx:/etc/nginx/conf.d/
+    networks:
+      - tfg-network
+    depends_on:
+      - app
+
+  # --- MySQL Database ---
+  db:
+    image: mysql:8.0
+    container_name: tfg-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}   # Reads from .env file
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./docker-data/mysql:/var/lib/mysql  # Persistent data storage
+    ports:
+      - "3306:3306"
+    networks:
+      - tfg-network
+
+  # --- Python AI Recommendation Service ---
+  ai-service:
+    build: 
+      context: ./encoder
+    container_name: tfg-ai-service
+    env_file: .env                     # Shares DB credentials with Laravel
+    ports:
+      - "8080:8000"                    # FastAPI Swagger UI at localhost:8080/docs
+    volumes:
+      - ./encoder:/app                 # Mount for live development
+    networks:
+      - tfg-network
+    depends_on:
+      - db
+
+# All services communicate via this shared bridge network
+networks:
+  tfg-network:
+    driver: bridge

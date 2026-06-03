@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pandas
+numpy
+scikit-learn
+faiss-cpu
+sentence-transformers
+mysql-connector-python
+sqlalchemy
+pymysql
+cryptography
+python-dotenv
+requests

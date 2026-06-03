@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+}
+
+@layer utilities {
+  /* EL GRADIENT EXACTE DEL DISSENY (Suavitzat i ample) */
+  .bg-gradient-design {
+    background: linear-gradient(
+      140deg,
+      #1E1B29 10%,
+      #3C3250 30%,
+      #A58EB4 50%,
+      #463A5D 70%,
+      #1B1924 90%
+    );
+  }
+}
+
+@layer base {
+  html, body {
+    /* Fons base gris fosc, no negre ni blau */
+    background-color: #1A1821; 
+    color: white;
+  }
+}

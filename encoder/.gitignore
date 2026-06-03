@@ -1,0 +1,20 @@
+# Generated FAISS index and mapping files (rebuilt at runtime via /refresh)
+songs_vector.index
+index_map.csv
+embeddings.npy
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
